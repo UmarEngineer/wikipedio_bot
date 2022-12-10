@@ -33,9 +33,14 @@ async def sendWiki(message: types.Message):
     try:
         respond = wikipedia.page(message.text)
         respond2 = wikipedia.summary(message.text)
-        # pprint(respond.content)
+        more = f"\n\nBatafsil o'qish uchun bosing\n{respond.url}"
         await bot.send_photo(chat_id=message.from_user.id, photo=respond.images[0])
-        await message.answer(f"{respond.title.upper()} \n\n {respond2}")
+        await message.answer(f"{respond.title.upper()}\n\n")
+        if len(respond2) > 4096:
+            for x in range(0, len(respond2), 4096):
+                await bot.send_message(message.chat.id, f"{respond2[x:x+4000]} {more}")
+        else:
+            await message.answer(f"{respond2} {more}")
 
     except wikipedia.exceptions.DisambiguationError as e:
         logging.info(e) 
