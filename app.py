@@ -6,11 +6,6 @@ from aiohttp import ClientSession
 import time
 import wikipedia
 from config import API_TOKEN
-from googletrans import Translator
-from Wikipedia2PDF import Wikipedia2PDF
-from pprint import pprint
-from keyboards import pdf
-from states import Holat
 
 logging.basicConfig(level=logging.INFO)
 
@@ -65,11 +60,7 @@ async def sendWiki(message: types.Message):
         # await message.answer(f"Hurmatli {message.from_user.full_name} afsuski, bu mavzu bo'yicha maqola topilmadi")
 
 async def empty_query(query: types.InlineQuery):
-    lang = translator.detect(message.text).lang
     
-    if lang == 'en':
-        word_id = translator.translate(message.text, dest='uz').text
-
     time.sleep(1)
     if not query.query == " ":
         try:
