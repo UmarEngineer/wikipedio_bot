@@ -9,6 +9,8 @@ from config import API_TOKEN
 from googletrans import Translator
 from Wikipedia2PDF import Wikipedia2PDF
 from pprint import pprint
+from keyboards import pdf
+from states import Holat
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,7 +37,8 @@ async def sendWiki(message: types.Message):
     try:
         respond = wikipedia.page(message.text)
         respond2 = wikipedia.summary(message.text)
-        
+        global respond_url
+        respond_url = respond.url
         more = f"\n\nBatafsil o'qish uchun bosing\n{respond.url}"
         await bot.send_photo(chat_id=message.from_user.id, photo=respond.images[0])
         if len(respond2) > 4096:
@@ -43,6 +46,8 @@ async def sendWiki(message: types.Message):
                 await bot.send_message(message.chat.id, f"{respond.title.upper()}\n\n{respond2[x:x+3950]} {more}")
         else:
             await message.answer(f"{respond.title.upper()}\n\n {respond2} {more}")
+    
+        # await bot.send_document(chat_id=message.from_user.id, document=Wikipedia2PDF(respond_url))
 
     except wikipedia.exceptions.DisambiguationError as e:
         option = ""
@@ -88,6 +93,8 @@ async def empty_query(query: types.InlineQuery):
         except wikipedia.exceptions.DisambiguationError as e:
             pprint(e.options)
 
+
+    
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
