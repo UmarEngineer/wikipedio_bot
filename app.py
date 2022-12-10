@@ -7,6 +7,8 @@ import time
 import wikipedia
 from config import API_TOKEN
 from googletrans import Translator
+from Wikipedia2PDF import Wikipedia2PDF
+from pprint import pprint
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,21 +35,28 @@ async def sendWiki(message: types.Message):
     try:
         respond = wikipedia.page(message.text)
         respond2 = wikipedia.summary(message.text)
+        
         more = f"\n\nBatafsil o'qish uchun bosing\n{respond.url}"
         await bot.send_photo(chat_id=message.from_user.id, photo=respond.images[0])
-        await message.answer(f"{respond.title.upper()}\n\n")
         if len(respond2) > 4096:
             for x in range(0, len(respond2), 4096):
-                await bot.send_message(message.chat.id, f"{respond2[x:x+4000]} {more}")
+                await bot.send_message(message.chat.id, f"{respond.title.upper()}\n\n{respond2[x:x+3950]} {more}")
         else:
-            await message.answer(f"{respond2} {more}")
+            await message.answer(f"{respond.title.upper()}\n\n {respond2} {more}")
 
     except wikipedia.exceptions.DisambiguationError as e:
+        option = ""
+        k = 1
+        for op in e.options:
+            option += f"{k}. {op.title()}\n"
+            k += 1
+        await message.answer(f"Iltimos variantlardan birini tanlang\n\n{option}")
         logging.info(e) 
+
 
     except Exception as e:
         logging.info(e)
-        await message.answer(f" Hurmatli {message.from_user.full_name} afsuski, bu mavzuga oid o'zbek tilida maqola topilmadi.\nUshbu mavzuga oid maqola yozib O'zbek tilidagi Wikipedia rivojiga o'z hissangizni qo'sha olasiz. Shu bilan birga WikiMarafonda qatnashib pul yutug'lariga ham ega bo'lishingiz mumkin. WikiStipendiya haqida ba'tafsil ma'lumot olish uchun quyidagi manzilni ziyorat qiling: https://t.me/wikistipendiya \n\n \"Wikipedia siz kabi insonlar tomonidan yaratildi\"")
+        await message.answer(f" Hurmatli <b>{message.from_user.full_name}</b> bot bilan bog'liq xato yuz berdi, qayta urunib ko'ring. \n\nYoki bu mavzuga oid o'zbek tilida maqola topilmadi.\nUshbu mavzuga oid maqola yozib O'zbek tilidagi Wikipedia rivojiga o'z hissangizni qo'sha olasiz. Shu bilan birga WikiMarafonda qatnashib pul yutug'lariga ham ega bo'lishingiz mumkin. WikiStipendiya haqida ba'tafsil ma'lumot olish uchun quyidagi manzilni ziyorat qiling: https://t.me/wikistipendiya \n\n \"Wikipedia siz kabi insonlar tomonidan yaratildi\"")
         # await message.answer(f"Hurmatli {message.from_user.full_name} afsuski, bu mavzu bo'yicha maqola topilmadi")
 
 async def empty_query(query: types.InlineQuery):
